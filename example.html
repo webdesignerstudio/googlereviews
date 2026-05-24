@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voorbeeld — Google Reviews</title>
+    <link rel="stylesheet" href="google-reviews.css">
+    <style>
+        /* Alleen voor dit voorbeeld — basis layout */
+        body { font-family: system-ui, sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== VOLLEDIGE REVIEWS (homepage stijl) ===== -->
+    <section class="gr-sectie-wrapper">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <span style="color: #dc2626; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem;">Ervaringen van klanten</span>
+                <h2 style="font-family: Georgia, serif; font-size: 2rem; margin: 0.5rem 0;">Wat onze klanten zeggen</h2>
+            </div>
+
+            <div class="gr-score-header">
+                <div class="gr-score-getal" data-reviews-score></div>
+                <div class="gr-score-info">
+                    <div class="gr-sterren" data-reviews-sterren></div>
+                    <div class="gr-score-label" data-reviews-totaal></div>
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="gr-google-link" data-reviews-link>
+                        Bekijk alle reviews op Google
+                    </a>
+                </div>
+            </div>
+
+            <div class="gr-grid" data-reviews="volledig" data-reviews-limit="5"></div>
+        </div>
+    </section>
+
+    <!-- ===== COMPACTE REVIEWS (contactpagina stijl) ===== -->
+    <section style="padding: 3rem 0;">
+        <div class="container">
+            <div class="gr-compact-wrapper" id="reviews-compact-block" style="display:none;">
+                <div class="gr-compact-header">
+                    <div class="gr-compact-score" data-reviews-score></div>
+                    <div class="gr-compact-meta">
+                        <div class="gr-sterren" data-reviews-sterren></div>
+                        <div class="gr-compact-label" data-reviews-totaal></div>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="gr-google-link" data-reviews-link>
+                            Alle reviews op Google ↗
+                        </a>
+                    </div>
+                </div>
+                <div data-reviews="compact"></div>
+            </div>
+        </div>
+    </section>
+
+    <script src="google-reviews.js"></script>
+</body>
+</html>
