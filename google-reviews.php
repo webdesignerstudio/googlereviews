@@ -35,8 +35,8 @@ $cache_dir    = __DIR__ . '/cache';
 $cache_bestand = $cache_dir . '/reviews_cache.json';
 $cache_tijd   = 604800; // 1 week (60 * 60 * 24 * 7)
 
-// Aantal reviews dat opgehaald wordt (maximaal 5)
-$max_reviews  = 5;
+// Optioneel: limiet via query parameter (bijv. ?limit=10)
+$max_reviews  = isset($_GET['limit']) ? max(1, (int) $_GET['limit']) : 50;
 
 // Minimale beoordeling (4 of 5 sterren)
 $min_rating   = 4;

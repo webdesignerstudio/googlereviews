@@ -19,7 +19,7 @@
 
     var CONFIG = {
         endpoint: 'google-reviews.php', // Pad naar de PHP proxy
-        defaultLimit: 5                  // Standaard aantal reviews
+        defaultLimit: 3                  // Standaard aantal reviews (eerste keer)
     };
 
     // ====================================================================
@@ -82,6 +82,79 @@
     // DATA LADEN
     // ====================================================================
 
+    function createLoadMoreButton(container, reviews, type, perLoad) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'gr-load-more';
+        btn.textContent = 'Meer laden';
+
+        btn.addEventListener('click', function() {
+            var current = parseInt(container.dataset.grShown, 10) || CONFIG.defaultLimit;
+            var next = current + perLoad;
+            var toShow = reviews.slice(current, next);
+            var html = type === 'volledig'
+                ? toShow.map(reviewKaartHtml).join('')
+                : toShow.map(compacteReviewHtml).join('');
+            container.insertAdjacentHTML('beforeend', html);
+            container.dataset.grShown = String(next);
+            if (next >= reviews.length) {
+                btn.classList.add('gr-hidden');
+            }
+        });
+
+        return btn;
+    }
+
+    function renderContainer(container, data) {
+        var type = container.dataset.reviews;
+        var initialLimit = parseInt(container.dataset.reviewsLimit, 10) || CONFIG.defaultLimit;
+        var perLoad = parseInt(container.dataset.reviewsPerLoad, 10) || 3;
+        var reviews = data.reviews;
+
+        if (type === 'volledig') {
+            var volledigWrapper = container.closest('.gr-sectie-wrapper');
+            var scoreEl    = volledigWrapper ? volledigWrapper.querySelector('[data-reviews-score]') : null;
+            var totaalEl   = volledigWrapper ? volledigWrapper.querySelector('[data-reviews-totaal]') : null;
+            var sterrenEl  = volledigWrapper ? volledigWrapper.querySelector('[data-reviews-sterren]') : null;
+            var linkEl     = volledigWrapper ? volledigWrapper.querySelector('[data-reviews-link]') : null;
+
+            if (scoreEl)   scoreEl.textContent   = data.gemiddeld ? data.gemiddeld.toFixed(1) : '';
+            if (totaalEl)  totaalEl.textContent  = data.totaal_reviews ? data.totaal_reviews + ' beoordelingen' : '';
+            if (sterrenEl) sterrenEl.innerHTML   = data.gemiddeld ? sterrenHtml(Math.round(data.gemiddeld)) : '';
+            if (linkEl)    linkEl.href            = data.google_url || '#';
+
+            container.innerHTML = reviews.slice(0, initialLimit).map(reviewKaartHtml).join('');
+            container.dataset.grShown = String(initialLimit);
+
+            if (reviews.length > initialLimit) {
+                var btn = createLoadMoreButton(container, reviews, 'volledig', perLoad);
+                container.parentNode.insertBefore(btn, container.nextSibling);
+            }
+
+        } else if (type === 'compact') {
+            var wrapper   = container.closest('.gr-compact-wrapper');
+            var scoreEl   = wrapper ? wrapper.querySelector('[data-reviews-score]') : null;
+            var totaalEl  = wrapper ? wrapper.querySelector('[data-reviews-totaal]') : null;
+            var sterrenEl = wrapper ? wrapper.querySelector('[data-reviews-sterren]') : null;
+            var linkEl    = wrapper ? wrapper.querySelector('[data-reviews-link]') : null;
+
+            if (scoreEl)   scoreEl.textContent  = data.gemiddeld ? data.gemiddeld.toFixed(1) : '';
+            if (totaalEl)  totaalEl.textContent = data.totaal_reviews ? data.totaal_reviews + ' Google reviews' : '';
+            if (sterrenEl) sterrenEl.innerHTML  = data.gemiddeld ? sterrenHtml(Math.round(data.gemiddeld)) : '';
+            if (linkEl)    linkEl.href           = data.google_url || '#';
+
+            container.innerHTML = reviews.slice(0, initialLimit).map(compacteReviewHtml).join('');
+            container.dataset.grShown = String(initialLimit);
+
+            if (wrapper) wrapper.style.display = '';
+
+            if (reviews.length > initialLimit) {
+                var btnCompact = createLoadMoreButton(container, reviews, 'compact', perLoad);
+                wrapper.appendChild(btnCompact);
+            }
+        }
+    }
+
     function laadReviews() {
         var containers = document.querySelectorAll('[data-reviews]');
         if (containers.length === 0) return;
@@ -94,48 +167,14 @@
             .then(function(data) {
                 if (!data.reviews || data.reviews.length === 0) {
                     containers.forEach(function(el) {
-                        var w = el.closest('.gr-sectie-wrapper');
+                        var w = el.closest('.gr-sectie-wrapper') || el.closest('.gr-compact-wrapper');
                         if (w) w.style.display = 'none';
                     });
                     return;
                 }
 
                 containers.forEach(function(container) {
-                    var type = container.dataset.reviews;
-                    var limit = parseInt(container.dataset.reviewsLimit, 10) || CONFIG.defaultLimit;
-
-                    if (type === 'volledig') {
-                        var volledigWrapper = container.closest('.gr-sectie-wrapper');
-                        var scoreEl    = volledigWrapper ? volledigWrapper.querySelector('[data-reviews-score]') : null;
-                        var totaalEl   = volledigWrapper ? volledigWrapper.querySelector('[data-reviews-totaal]') : null;
-                        var sterrenEl  = volledigWrapper ? volledigWrapper.querySelector('[data-reviews-sterren]') : null;
-                        var linkEl     = volledigWrapper ? volledigWrapper.querySelector('[data-reviews-link]') : null;
-
-                        if (scoreEl)   scoreEl.textContent   = data.gemiddeld ? data.gemiddeld.toFixed(1) : '';
-                        if (totaalEl)  totaalEl.textContent  = data.totaal_reviews ? data.totaal_reviews + ' beoordelingen' : '';
-                        if (sterrenEl) sterrenEl.innerHTML   = data.gemiddeld ? sterrenHtml(Math.round(data.gemiddeld)) : '';
-                        if (linkEl)    linkEl.href            = data.google_url || '#';
-
-                        var reviewsToShow = data.reviews.slice(0, limit);
-                        container.innerHTML = reviewsToShow.map(reviewKaartHtml).join('');
-
-                    } else if (type === 'compact') {
-                        var wrapper   = container.closest('.gr-compact-wrapper');
-                        var scoreEl   = wrapper ? wrapper.querySelector('[data-reviews-score]') : null;
-                        var totaalEl  = wrapper ? wrapper.querySelector('[data-reviews-totaal]') : null;
-                        var sterrenEl = wrapper ? wrapper.querySelector('[data-reviews-sterren]') : null;
-                        var linkEl    = wrapper ? wrapper.querySelector('[data-reviews-link]') : null;
-
-                        if (scoreEl)   scoreEl.textContent  = data.gemiddeld ? data.gemiddeld.toFixed(1) : '';
-                        if (totaalEl)  totaalEl.textContent = data.totaal_reviews ? data.totaal_reviews + ' Google reviews' : '';
-                        if (sterrenEl) sterrenEl.innerHTML  = data.gemiddeld ? sterrenHtml(Math.round(data.gemiddeld)) : '';
-                        if (linkEl)    linkEl.href           = data.google_url || '#';
-
-                        var compacteReviews = data.reviews.slice(0, 3);
-                        container.innerHTML = compacteReviews.map(compacteReviewHtml).join('');
-
-                        if (wrapper) wrapper.style.display = '';
-                    }
+                    renderContainer(container, data);
                 });
             })
             .catch(function() {
