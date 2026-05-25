@@ -21,14 +21,19 @@
                 <h2 style="font-family: Georgia, serif; font-size: 2rem; margin: 0.5rem 0;">Wat onze klanten zeggen</h2>
             </div>
 
-            <div class="gr-score-header">
-                <div class="gr-score-getal" data-reviews-score></div>
-                <div class="gr-score-info">
-                    <div class="gr-sterren" data-reviews-sterren></div>
-                    <div class="gr-score-label" data-reviews-totaal></div>
-                    <a href="#" target="_blank" rel="noopener noreferrer" class="gr-google-link" data-reviews-link>
-                        Bekijk alle reviews op Google
-                    </a>
+            <div class="gr-score-header" itemscope itemtype="https://schema.org/LocalBusiness">
+                <meta itemprop="name" content="Webdesigner Studio">
+                <div itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+                    <div class="gr-score-getal" itemprop="ratingValue" data-reviews-score></div>
+                    <div class="gr-score-info">
+                        <div class="gr-sterren" data-reviews-sterren></div>
+                        <div class="gr-score-label"><span itemprop="reviewCount" data-reviews-totaal></span> beoordelingen</div>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="gr-google-link" data-reviews-link itemprop="url">
+                            Bekijk alle reviews op Google
+                        </a>
+                    </div>
+                    <meta itemprop="bestRating" content="5">
+                    <meta itemprop="worstRating" content="1">
                 </div>
             </div>
 

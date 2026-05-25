@@ -308,3 +308,51 @@
 .gr-hidden {
     display: none !important;
 }
+
+/* --------------------------------------------------------------------------
+   Toegankelijkheid — Screenreader only & Semantische elementen reset
+   -------------------------------------------------------------------------- */
+
+/* Screenreader-only tekst (onzichtbaar visueel, wel voorgelezen) */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Semantische elementen reset — behoud visuele styling */
+.gr-kaart,
+.gr-compact-item {
+    /* article elementen gedragen zich als de originele divs */
+    margin: 0;
+}
+
+/* h3 gedraagt zich als .gr-naam */
+h3.gr-naam {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+/* time element gedraagt zich als .gr-datum */
+time.gr-datum {
+    display: block;
+}
+
+/* blockquote reset binnen compacte reviews */
+.gr-compact-tekst blockquote,
+.gr-compact-tekst p {
+    margin: 0;
+}
+
+/* footer reset binnen compacte reviews */
+.gr-compact-item footer {
+    margin: 0;
+}

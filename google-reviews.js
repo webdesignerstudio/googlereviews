@@ -26,11 +26,13 @@
     // HELPER FUNCTIES
     // ====================================================================
 
-    function sterrenHtml(beoordeling) {
-        var html = '<span class="gr-sterren-lijst">';
+    function sterrenHtml(beoordeling, ariaLabel) {
+        var label = ariaLabel || (beoordeling + ' van 5 sterren');
+        var html = '<span class="gr-sterren-lijst" aria-label="' + label + '">';
         for (var i = 1; i <= 5; i++) {
             var kleur = i <= beoordeling ? '#FBBF24' : '#D1D5DB';
-            html += '<svg width="16" height="16" viewBox="0 0 20 20" fill="' + kleur + '" style="display:inline-block;vertical-align:middle;flex-shrink:0" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
+            var filled = i <= beoordeling ? 'true' : 'false';
+            html += '<svg width="16" height="16" viewBox="0 0 20 20" fill="' + kleur + '" style="display:inline-block;vertical-align:middle;flex-shrink:0" aria-hidden="true" data-filled="' + filled + '" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
         }
         html += '</span>';
         return html;
@@ -49,33 +51,36 @@
 
     function reviewKaartHtml(review) {
         var avatarHtml = review.foto
-            ? '<img src="' + review.foto + '" alt="' + review.naam + '" class="gr-avatar-img" loading="lazy" onerror="this.style.display=\'none\'">'
-            : initiaalAvatar(review.naam);
+            ? '<img src="' + review.foto + '" alt="Profielfoto van ' + review.naam + '" class="gr-avatar-img" loading="lazy" onerror="this.style.display=\'none\'">'
+            : '<div class="gr-avatar" role="img" aria-label="Avatar van ' + review.naam + '">' + initiaalAvatar(review.naam) + '</div>';
 
         var tekst = review.tekst.length > 180
             ? review.tekst.substring(0, 180) + '…'
             : review.tekst;
 
-        return '<div class="gr-kaart">'
+        var ariaLabel = 'Review van ' + review.naam + ': ' + review.beoordeling + ' van 5 sterren';
+
+        return '<article class="gr-kaart" aria-label="' + ariaLabel + '">'
             + '<div class="gr-kaart-top">'
-            + '<div class="gr-avatar">' + avatarHtml + '</div>'
+            + avatarHtml
             + '<div class="gr-auteur">'
-            + '<div class="gr-naam">' + review.naam + '</div>'
-            + '<div class="gr-datum">' + review.datum + '</div>'
+            + '<h3 class="gr-naam">' + review.naam + '</h3>'
+            + '<time class="gr-datum" datetime="">' + review.datum + '</time>'
             + '</div>'
             + '</div>'
-            + '<div class="gr-sterren">' + sterrenHtml(review.beoordeling) + '</div>'
+            + '<div class="gr-sterren">' + sterrenHtml(review.beoordeling, review.beoordeling + ' van 5 sterren') + '</div>'
             + '<p class="gr-tekst">' + tekst + '</p>'
-            + '</div>';
+            + '</article>';
     }
 
     function compacteReviewHtml(review) {
         var tekst = review.tekst.length > 120 ? review.tekst.substring(0, 120) + '…' : review.tekst;
-        return '<div class="gr-compact-item">'
-            + '<div class="gr-sterren">' + sterrenHtml(review.beoordeling) + '</div>'
-            + '<p class="gr-compact-tekst">&ldquo;' + tekst + '&rdquo;</p>'
-            + '<div class="gr-compact-naam">&mdash; ' + review.naam + '</div>'
-            + '</div>';
+        var ariaLabel = 'Review van ' + review.naam + ': ' + review.beoordeling + ' van 5 sterren';
+        return '<article class="gr-compact-item" aria-label="' + ariaLabel + '">'
+            + '<div class="gr-sterren">' + sterrenHtml(review.beoordeling, review.beoordeling + ' van 5 sterren') + '</div>'
+            + '<blockquote class="gr-compact-tekst"><p>&ldquo;' + tekst + '&rdquo;</p></blockquote>'
+            + '<footer class="gr-compact-naam">&mdash; ' + review.naam + '</footer>'
+            + '</article>';
     }
 
     // ====================================================================
@@ -86,7 +91,13 @@
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'gr-load-more';
-        btn.textContent = 'Meer laden';
+        btn.textContent = 'Meer laden (' + (reviews.length - (parseInt(container.dataset.grShown, 10) || CONFIG.defaultLimit)) + ' over)';
+        btn.setAttribute('aria-label', 'Laad meer reviews, ' + (reviews.length - (parseInt(container.dataset.grShown, 10) || CONFIG.defaultLimit)) + ' over');
+        btn.setAttribute('aria-expanded', 'false');
+
+        // Zorg dat container een aria-live regio heeft voor screenreader notificaties
+        container.setAttribute('aria-live', 'polite');
+        container.setAttribute('aria-atomic', 'false');
 
         btn.addEventListener('click', function() {
             var current = parseInt(container.dataset.grShown, 10) || CONFIG.defaultLimit;
@@ -97,8 +108,14 @@
                 : toShow.map(compacteReviewHtml).join('');
             container.insertAdjacentHTML('beforeend', html);
             container.dataset.grShown = String(next);
-            if (next >= reviews.length) {
+
+            var remaining = reviews.length - next;
+            if (remaining > 0) {
+                btn.textContent = 'Meer laden (' + remaining + ' over)';
+                btn.setAttribute('aria-label', 'Laad meer reviews, ' + remaining + ' over');
+            } else {
                 btn.classList.add('gr-hidden');
+                btn.setAttribute('aria-label', 'Alle reviews geladen');
             }
         });
 
